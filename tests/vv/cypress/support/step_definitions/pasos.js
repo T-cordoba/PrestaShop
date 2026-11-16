@@ -27,6 +27,13 @@ Before(() => {
   form = undefined;
 });
 
+// The ISO code is unique: remove the countries a previous run created so the scenarios stay repeatable.
+Before({ tags: '@rf-05' }, () => {
+  cy.task('sql', "DELETE c, cl, cs, af FROM ps_country c LEFT JOIN ps_country_lang cl ON cl.id_country = c.id_country "
+    + "LEFT JOIN ps_country_shop cs ON cs.id_country = c.id_country LEFT JOIN ps_address_format af ON af.id_country = c.id_country "
+    + "WHERE c.iso_code IN ('QB', 'QBZ')");
+});
+
 Given('que la administradora inició sesión en el back office', () => {
   cy.loginBO();
 });
