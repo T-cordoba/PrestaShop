@@ -14,7 +14,7 @@ JUDGE = OllamaModel(model=os.environ.get('VV_JUDGE_MODEL', 'qwen2.5:latest'), ba
 def ask(assistant: str, payload_json: str) -> dict:
     """Returns {"output": str, "context": [str]} — cached so every metric scores the same answer."""
     completed = subprocess.run(
-        ['docker', 'exec', '-u', 'www-data', '-w', '/var/www/html', CONTAINER,
+        ['docker', 'exec', '-u', 'www-data', '-w', '/var/www/html', '-e', 'VV_OLLAMA_MODEL=qwen2.5:latest', CONTAINER,
          'php', 'bin/console', '--env=prod', '--no-debug', 'prestashop:ai:assistant', assistant, payload_json],
         capture_output=True, text=True, encoding='utf-8', timeout=600, check=True,
     )
