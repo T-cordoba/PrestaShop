@@ -22,7 +22,6 @@ declare(strict_types=1);
 
 namespace Tests\Integration\VV;
 
-use Db;
 use PrestaShop\PrestaShop\Adapter\Supplier\CommandHandler\ToggleSupplierStatusHandler;
 use PrestaShop\PrestaShop\Core\Domain\Supplier\Command\ToggleSupplierStatusCommand;
 use PrestaShop\PrestaShop\Core\Domain\Supplier\Exception\CannotToggleSupplierStatusException;
@@ -73,11 +72,11 @@ final class RF08ToggleSupplierStatusHandlerPathsTest extends PathTestCase
         $this->toggle(999999);
     }
 
-    public function testCamino3ToggleStatusLanzaConDatosInvalidosEnBd(): void
+    public function testCamino3ToggleStatusLanza(): void
     {
-        // Arrange — nombre inválido escrito directamente en la BD (saltándose la validación del BO)
+        // Arrange — fake: the UPDATE of toggleStatus() throws
         $id = $this->newSupplier();
-        Db::getInstance()->update('supplier', ['name' => 'Prov<>{}'], 'id_supplier = ' . $id);
+        FaultyDb::install('update', new PrestaShopDatabaseException('forzada'));
 
         // Act / Assert
         $this->expectException(SupplierException::class);
