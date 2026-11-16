@@ -80,6 +80,9 @@ pipeline {
 
         stage('Quality gate') {
             steps {
+                // No Sonar→Jenkins webhook for this project: once the task has finished, waitForQualityGate reads the
+                // status directly instead of waiting for the callback.
+                sleep time: 30, unit: 'SECONDS'
                 timeout(time: 10, unit: 'MINUTES') {
                     waitForQualityGate abortPipeline: true
                 }
