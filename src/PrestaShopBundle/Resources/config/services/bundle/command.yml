@@ -125,3 +125,29 @@ services:
     autowire: true
     tags:
       - 'console.command'
+
+  # AI assistants evaluated with DeepEval (V&V project). Ollama runs on the host.
+  PrestaShop\PrestaShop\Adapter\Ai\OllamaClient:
+    arguments:
+      - '@http_client'
+      - '%env(default:vv_ollama_url:VV_OLLAMA_URL)%'
+      - '%env(default:vv_ollama_model:VV_OLLAMA_MODEL)%'
+
+  PrestaShop\PrestaShop\Adapter\Ai\BrandDescriptionWriter:
+    arguments:
+      - '@PrestaShop\PrestaShop\Adapter\Ai\OllamaClient'
+
+  PrestaShop\PrestaShop\Adapter\Ai\TaxConfigurationExplainer:
+    arguments:
+      - '@PrestaShop\PrestaShop\Adapter\Ai\OllamaClient'
+
+  PrestaShopBundle\Command\AiAssistantCommand:
+    arguments:
+      - '@PrestaShop\PrestaShop\Adapter\Ai\BrandDescriptionWriter'
+      - '@PrestaShop\PrestaShop\Adapter\Ai\TaxConfigurationExplainer'
+    tags:
+      - 'console.command'
+
+parameters:
+  vv_ollama_url: 'http://host.docker.internal:11434'
+  vv_ollama_model: 'llama3.2:3b'
