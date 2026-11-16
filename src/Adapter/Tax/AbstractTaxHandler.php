@@ -8,6 +8,7 @@ declare(strict_types=1);
 
 namespace PrestaShop\PrestaShop\Adapter\Tax;
 
+use PrestaShop\PrestaShop\Core\Domain\Tax\Exception\TaxConstraintException;
 use PrestaShop\PrestaShop\Core\Domain\Tax\Exception\TaxException;
 use PrestaShop\PrestaShop\Core\Domain\Tax\Exception\TaxNotFoundException;
 use PrestaShop\PrestaShop\Core\Domain\Tax\ValueObject\TaxId;
@@ -39,5 +40,15 @@ abstract class AbstractTaxHandler
         }
 
         return $tax;
+    }
+
+    /**
+     * @throws TaxConstraintException
+     */
+    protected function assertRateIsNotNegative(mixed $rate): void
+    {
+        if ((float) $rate < 0) {
+            throw new TaxConstraintException(sprintf('Tax rate cannot be negative, got "%s"', $rate), TaxConstraintException::INVALID_RATE);
+        }
     }
 }
