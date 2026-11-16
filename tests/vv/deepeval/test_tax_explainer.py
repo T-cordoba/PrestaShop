@@ -1,10 +1,9 @@
 """DeepEval — Juliana: TaxConfigurationExplainer (RF-01, RF-02). Run: .venv/Scripts/python -m pytest test_tax_explainer.py -v"""
 import pytest
-from deepeval import assert_test
 from deepeval.metrics import AnswerRelevancyMetric, FaithfulnessMetric, GEval, HallucinationMetric
 from deepeval.test_case import LLMTestCase, LLMTestCaseParams
 
-from assistant import JUDGE, tax
+from assistant import JUDGE, evaluate_and_record, tax
 
 REFUSAL = 'No tengo esa información en la configuración de la tienda.'
 
@@ -37,11 +36,12 @@ def test_tax_explainer(case_id, question, kind):
     output, context = answer['output'], answer['context']
 
     assert context, 'the retrieval step returned no tax from the shop'
-    if kind == 'refuse':
-        assert 'no tengo esa información' in output.lower(), f'expected the refusal sentence, got: {output}'
 
     test_case = LLMTestCase(input=question, actual_output=output, context=context, retrieval_context=context)
     metrics = [FaithfulnessMetric(threshold=0.7, model=JUDGE), HallucinationMetric(threshold=0.5, model=JUDGE), GROUNDED]
     if kind == 'answer':
         metrics.insert(0, AnswerRelevancyMetric(threshold=0.7, model=JUDGE))
-    assert_test(test_case, metrics)
+    failed = evaluate_and_record('tax-explainer', case_id, test_case, metrics, {'kind': kind})
+    if kind == 'refuse':
+        assert 'no tengo esa información' in output.lower(), f'expected the refusal sentence, got: {output}'
+    assert not failed, 'metrics below threshold: ' + '; '.join(failed)
