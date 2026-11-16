@@ -10,6 +10,7 @@ use PrestaShop\PrestaShop\Adapter\Tax\AbstractTaxHandler;
 use PrestaShop\PrestaShop\Core\CommandBus\Attributes\AsCommandHandler;
 use PrestaShop\PrestaShop\Core\Domain\Tax\Command\AddTaxCommand;
 use PrestaShop\PrestaShop\Core\Domain\Tax\CommandHandler\AddTaxHandlerInterface;
+use PrestaShop\PrestaShop\Core\Domain\Tax\Exception\TaxConstraintException;
 use PrestaShop\PrestaShop\Core\Domain\Tax\Exception\TaxException;
 use PrestaShop\PrestaShop\Core\Domain\Tax\ValueObject\TaxId;
 use PrestaShopException;
@@ -28,6 +29,10 @@ final class AddTaxHandler extends AbstractTaxHandler implements AddTaxHandlerInt
      */
     public function handle(AddTaxCommand $command)
     {
+        if ((float) $command->getRate() < 0) {
+            throw new TaxConstraintException('Tax rate cannot be negative', TaxConstraintException::INVALID_RATE);
+        }
+
         $tax = new Tax();
 
         $tax->name = $command->getLocalizedNames();

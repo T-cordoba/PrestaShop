@@ -20,4 +20,9 @@ class TaxConstraintException extends TaxException
      * Thrown when provided tax status value is not valid
      */
     public const INVALID_STATUS = 20;
+
+    /**
+     * Thrown when provided tax rate is negative
+     */
+    public const INVALID_RATE = 30;
 }
