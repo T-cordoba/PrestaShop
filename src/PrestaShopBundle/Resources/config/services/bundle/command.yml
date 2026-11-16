@@ -150,4 +150,4 @@ services:
 
 parameters:
   vv_ollama_url: 'http://host.docker.internal:11434'
-  vv_ollama_model: 'llama3.2:3b'
+  vv_ollama_model: 'qwen2.5:latest'
