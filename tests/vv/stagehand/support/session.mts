@@ -16,15 +16,23 @@ export async function openSession(spec: string): Promise<Session> {
   const stagehand = await Stagehand.create({
     browser,
     model: createOllamaClient(),
-    logging: { level: 1, format: 'json', onLog: (entry) => appendJsonl(`stagehand-${spec}.log.jsonl`, entry) },
+    logging: { level: 'info', format: 'json', onLog: (entry) => appendJsonl(`stagehand-${spec}.log.jsonl`, entry) },
   });
   const [page] = await browser.context.pages();
   if (!page) throw new Error('Stagehand no abrió ninguna pestaña.');
 
   await page.goto(`${ADMIN}/`);
-  await page.locator('input[name="email"]:visible').fill(process.env.BO_EMAIL!);
-  await page.locator('input[name="passwd"]:visible').fill(process.env.BO_PASSWORD!);
-  await page.locator('[name="submit_login"]:visible').click();
+  await waitFor('el formulario de login', () => page.evaluate(() => !!document.querySelector('input[name="passwd"]')));
+  await page.evaluate(
+    ([email, password]) => {
+      const pass = document.querySelector<HTMLInputElement>('input[name="passwd"]')!;
+      const form = pass.form!;
+      form.querySelector<HTMLInputElement>('input[name="email"]')!.value = email;
+      pass.value = password;
+      form.querySelector<HTMLButtonElement>('[name="submit_login"]')!.click();
+    },
+    [process.env.BO_EMAIL!, process.env.BO_PASSWORD!],
+  );
   const token = await waitFor('el token del BO tras el login', () =>
     page.evaluate(() => {
       const a = document.querySelector<HTMLAnchorElement>('a[href*="_token="]');

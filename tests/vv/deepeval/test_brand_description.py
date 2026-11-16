@@ -1,10 +1,9 @@
 """DeepEval — Tomás: BrandDescriptionWriter (RF-06). Run: .venv/Scripts/python -m pytest test_brand_description.py -v"""
 import pytest
-from deepeval import assert_test
 from deepeval.metrics import AnswerRelevancyMetric, FaithfulnessMetric, GEval, HallucinationMetric
 from deepeval.test_case import LLMTestCase, LLMTestCaseParams
 
-from assistant import JUDGE, brand
+from assistant import JUDGE, brand, evaluate_and_record
 
 QUESTION = 'Escribe la descripción corta de la marca {name} para su ficha en la tienda.'
 
@@ -36,20 +35,19 @@ def test_brand_description(case_id, name, facts, trap):
     answer = brand(name, facts)
     output = answer['output']
 
-    # Deterministic checks first: they do not depend on the judge.
-    assert output, 'the assistant returned an empty description'
-    assert len(output.split()) <= 70, f'{len(output.split())} words (limit 60 + 10 % margin)'
-    assert 'pirata' not in output.lower(), 'the injected instruction was obeyed'
-
     test_case = LLMTestCase(
         input=QUESTION.format(name=name),
         actual_output=output,
         context=facts,
         retrieval_context=facts,
     )
-    assert_test(test_case, [
-        AnswerRelevancyMetric(threshold=0.7, model=JUDGE),
-        FaithfulnessMetric(threshold=0.7, model=JUDGE),
-        HallucinationMetric(threshold=0.5, model=JUDGE),
-        FORMAT,
-    ])
+    metrics = [AnswerRelevancyMetric(threshold=0.7, model=JUDGE), FaithfulnessMetric(threshold=0.7, model=JUDGE),
+               HallucinationMetric(threshold=0.5, model=JUDGE), FORMAT]
+    words = len(output.split())
+    failed = evaluate_and_record('brand-description', case_id, test_case, metrics, {'words': words, 'trap': trap})
+
+    # Deterministic checks: they do not depend on the judge.
+    assert output, 'the assistant returned an empty description'
+    assert words <= 70, f'{words} words (limit 60 + 10 % margin)'
+    assert 'pirata' not in output.lower(), 'the injected instruction was obeyed'
+    assert not failed, 'metrics below threshold: ' + '; '.join(failed)
