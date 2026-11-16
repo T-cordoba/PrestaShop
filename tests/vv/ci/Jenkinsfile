@@ -91,7 +91,8 @@ pipeline {
 
         stage('Docker build') {
             steps {
-                sh 'docker build -f .docker/Dockerfile -t prestashop-vv:${BUILD_NUMBER} --build-arg USER_ID=1000 --build-arg GROUP_ID=1000 --build-arg TIMEZONE=UTC .'
+                // .docker/Dockerfile uses COPY --chmod, which needs BuildKit (buildx installed in the Jenkins container).
+                sh 'DOCKER_BUILDKIT=1 docker build -f .docker/Dockerfile -t prestashop-vv:${BUILD_NUMBER} --build-arg USER_ID=1000 --build-arg GROUP_ID=1000 --build-arg TIMEZONE=UTC .'
             }
         }
     }
