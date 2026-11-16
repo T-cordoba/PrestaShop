@@ -48,12 +48,10 @@ pipeline {
                 sh '''
                     docker run --rm --volumes-from jenkins -w "$WORKSPACE" -e REPORTS="$REPORTS" $PHP_IMAGE bash -c '
                       (php -m | grep -q pcov) || (pecl install pcov >/dev/null && docker-php-ext-enable pcov) &&
-                      php -d memory_limit=1G -d pcov.enabled=1 vendor/bin/phpunit -c tests/Unit/phpunit.xml tests/Unit/VV \
+                      php -d memory_limit=1G -d pcov.enabled=1 vendor/bin/phpunit -c tests/vv/ci/phpunit-vv.xml \
                         --log-junit $REPORTS/junit-unit.xml \
                         --coverage-clover $REPORTS/clover-unit.xml \
-                        --coverage-html $REPORTS/coverage-unit \
-                        --coverage-filter src/Core/Domain/Country/AddressFormat/AddressFormatChecker.php \
-                        --coverage-filter src/Core/Grid/Query/ManufacturerQueryBuilder.php'
+                        --coverage-html $REPORTS/coverage-unit'
                 '''
             }
             post {

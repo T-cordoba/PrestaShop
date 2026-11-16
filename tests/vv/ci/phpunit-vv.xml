@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- V&V unit suites with coverage limited to the units whose every path has a unit test (tests/Unit/phpunit.xml still
+     uses the PHPUnit 9 <filter> syntax, which PHPUnit 10 rejects for coverage). -->
+<phpunit bootstrap="../../Unit/bootstrap.php" colors="false">
+  <php>
+    <server name="KERNEL_CLASS" value="AdminKernel"/>
+  </php>
+  <testsuites>
+    <testsuite name="VV-Unit">
+      <directory>../../Unit/VV</directory>
+    </testsuite>
+  </testsuites>
+  <source>
+    <include>
+      <file>../../../src/Core/Domain/Country/AddressFormat/AddressFormatChecker.php</file>
+      <file>../../../src/Core/Grid/Query/ManufacturerQueryBuilder.php</file>
+    </include>
+  </source>
+</phpunit>
