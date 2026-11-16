@@ -68,7 +68,7 @@ final class RF09DeleteProductSupplierRelationPathsTest extends PathTestCase
         return $ids;
     }
 
-    private function run(int $supplierId, ProductSupplierUpdater $updater): mixed
+    private function removeRelations(int $supplierId, ProductSupplierUpdater $updater): mixed
     {
         // Dummy: la dirección del proveedor no participa en esta unidad.
         $addressProvider = $this->createStub(SupplierAddressProvider::class);
@@ -90,7 +90,7 @@ final class RF09DeleteProductSupplierRelationPathsTest extends PathTestCase
         $updater->expects(self::never())->method('resetSupplierAssociations');
 
         // Act
-        $result = $this->run($supplierId, $updater);
+        $result = $this->removeRelations($supplierId, $updater);
 
         // Assert
         Expect::that($result)->toBe(true);
@@ -105,7 +105,7 @@ final class RF09DeleteProductSupplierRelationPathsTest extends PathTestCase
         $updater->expects(self::once())->method('resetSupplierAssociations')->with([new ProductId($productId)]);
 
         // Act
-        $result = $this->run($supplierId, $updater);
+        $result = $this->removeRelations($supplierId, $updater);
 
         // Assert
         Expect::that($result)->toBe(true);
@@ -124,7 +124,7 @@ final class RF09DeleteProductSupplierRelationPathsTest extends PathTestCase
         });
 
         // Act
-        $this->run($supplierId, $updater);
+        $this->removeRelations($supplierId, $updater);
 
         // Assert
         Expect::that($received)->toBe($productIds);
@@ -135,6 +135,6 @@ final class RF09DeleteProductSupplierRelationPathsTest extends PathTestCase
     {
         $supplierId = $this->newSupplier();
         $updater = $this->createStub(ProductSupplierUpdater::class);
-        self::measure('RF-09', fn () => $this->run($supplierId, $updater), 2000);
+        self::measure('RF-09', fn () => $this->removeRelations($supplierId, $updater), 2000);
     }
 }
