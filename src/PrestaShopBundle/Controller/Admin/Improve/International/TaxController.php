@@ -12,6 +12,7 @@ use PrestaShop\PrestaShop\Core\Domain\Tax\Command\BulkToggleTaxStatusCommand;
 use PrestaShop\PrestaShop\Core\Domain\Tax\Command\DeleteTaxCommand;
 use PrestaShop\PrestaShop\Core\Domain\Tax\Command\ToggleTaxStatusCommand;
 use PrestaShop\PrestaShop\Core\Domain\Tax\Exception\DeleteTaxException;
+use PrestaShop\PrestaShop\Core\Domain\Tax\Exception\TaxConstraintException;
 use PrestaShop\PrestaShop\Core\Domain\Tax\Exception\TaxException;
 use PrestaShop\PrestaShop\Core\Domain\Tax\Exception\TaxNotFoundException;
 use PrestaShop\PrestaShop\Core\Domain\Tax\Exception\UpdateTaxException;
@@ -350,6 +351,13 @@ class TaxController extends PrestaShopAdminController
                 [],
                 'Admin.Notifications.Error'
             ),
+            TaxConstraintException::class => [
+                TaxConstraintException::INVALID_RATE => $this->trans(
+                    'The %s field is invalid.',
+                    [sprintf('"%s"', $this->trans('Rate', [], 'Admin.International.Feature'))],
+                    'Admin.Notifications.Error'
+                ),
+            ],
             UpdateTaxException::class => [
                 UpdateTaxException::FAILED_BULK_UPDATE_STATUS => [
                     $this->trans(
