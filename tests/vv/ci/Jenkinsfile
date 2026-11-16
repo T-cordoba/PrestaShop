@@ -70,6 +70,7 @@ pipeline {
                           -e SONAR_HOST_URL="http://sonarqube:9000" -e SONAR_TOKEN="$SONAR_AUTH_TOKEN" \
                           sonarsource/sonar-scanner-cli \
                           -Dproject.settings=tests/vv/ci/sonar-project.properties \
+                          -Dsonar.projectBaseDir="$WORKSPACE" -Dsonar.working.directory="$WORKSPACE/.scannerwork" \
                           -Dsonar.projectVersion=$(git rev-parse --short HEAD)
                     '''
                 }
