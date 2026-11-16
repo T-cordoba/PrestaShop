@@ -1,0 +1,10 @@
+node_modules/
+.env
+reports/
+cypress/screenshots/
+cypress/videos/
+.venv/
+__pycache__/
+.deepeval/
+*.log
+ci-reports/

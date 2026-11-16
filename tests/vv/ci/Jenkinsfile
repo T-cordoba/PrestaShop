@@ -1,0 +1,114 @@
+// V&V pipeline for the selected PrestaShop units (RF-01..RF-10).
+// Runs on the jenkins/jenkins:lts container of devops-net, with the host Docker socket mounted (see tests/vv/ci/README.md).
+pipeline {
+    agent any
+
+    options {
+        timestamps()
+        disableConcurrentBuilds()
+        timeout(time: 90, unit: 'MINUTES')
+    }
+
+    environment {
+        PHP_IMAGE = 'prestashop/base:8.1-apache'
+        SONAR_PROJECT_KEY = 'prestashop-vv'
+        // Shared between stages through the workspace, which is bind-mounted into every container.
+        REPORTS = 'tests/vv/reports/ci'
+    }
+
+    stages {
+        stage('Verify tools') {
+            steps {
+                sh 'docker version --format "{{.Server.Version}}"'
+                sh 'git log -1 --format="%H %s"'
+            }
+        }
+
+        stage('Install dependencies') {
+            steps {
+                sh '''
+                    docker run --rm -v "$WORKSPACE":/app -w /app $PHP_IMAGE bash -c '
+                      curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer &&
+                      composer install --no-interaction --prefer-dist --no-progress --no-scripts'
+                '''
+            }
+        }
+
+        stage('Static analysis') {
+            steps {
+                sh '''
+                    docker run --rm -v "$WORKSPACE":/app -w /app $PHP_IMAGE bash -c '
+                      php vendor/bin/php-cs-fixer fix --dry-run --diff --config=.php-cs-fixer.dist.php tests/Unit/VV tests/Integration/VV'
+                '''
+            }
+        }
+
+        stage('Unit tests and coverage') {
+            steps {
+                sh 'mkdir -p "$REPORTS"'
+                sh '''
+                    docker run --rm -v "$WORKSPACE":/app -w /app $PHP_IMAGE bash -c '
+                      (php -m | grep -q pcov) || (pecl install pcov >/dev/null && docker-php-ext-enable pcov) &&
+                      php -d memory_limit=1G -d pcov.enabled=1 vendor/bin/phpunit -c tests/Unit/phpunit.xml tests/Unit/VV \
+                        --log-junit $REPORTS/junit-unit.xml \
+                        --coverage-clover $REPORTS/clover-unit.xml \
+                        --coverage-html $REPORTS/coverage-unit \
+                        --coverage-filter src/Core/Domain/Country/AddressFormat/AddressFormatChecker.php \
+                        --coverage-filter src/Core/Grid/Query/ManufacturerQueryBuilder.php'
+                '''
+            }
+            post {
+                always {
+                    junit "${REPORTS}/junit-unit.xml"
+                    archiveArtifacts artifacts: "${REPORTS}/**", allowEmptyArchive: true
+                }
+            }
+        }
+
+        stage('SonarQube analysis') {
+            steps {
+                withSonarQubeEnv('sonarqube') {
+                    sh '''
+                        docker run --rm --network devops-net -v "$WORKSPACE":/usr/src -w /usr/src \
+                          -e SONAR_HOST_URL="$SONAR_HOST_URL" -e SONAR_TOKEN="$SONAR_AUTH_TOKEN" \
+                          sonarsource/sonar-scanner-cli \
+                          -Dproject.settings=tests/vv/ci/sonar-project.properties \
+                          -Dsonar.projectVersion=$(git rev-parse --short HEAD)
+                    '''
+                }
+            }
+        }
+
+        stage('Quality gate') {
+            steps {
+                timeout(time: 10, unit: 'MINUTES') {
+                    waitForQualityGate abortPipeline: true
+                }
+            }
+        }
+
+        stage('Docker build') {
+            steps {
+                sh 'docker build -f .docker/Dockerfile -t prestashop-vv:${BUILD_NUMBER} --build-arg USER_ID=1000 --build-arg GROUP_ID=1000 --build-arg TIMEZONE=UTC .'
+            }
+        }
+
+        stage('E2E smoke (API)') {
+            // The shop under test runs on the host (docker compose of the repo); Jenkins reaches it through the host gateway.
+            when { expression { return env.E2E_BASE_URL } }
+            steps {
+                sh '''
+                    docker run --rm -v "$WORKSPACE/tests/vv":/e2e -w /e2e --add-host=localhost:host-gateway \
+                      -e CYPRESS_API_URL="$E2E_API_URL" cypress/included:15.6.0 \
+                      --spec "cypress/e2e/rf-04-eliminar-zona.feature,cypress/e2e/rf-09-eliminar-proveedor.feature" || true
+                '''
+            }
+        }
+    }
+
+    post {
+        always {
+            echo "Build ${currentBuild.currentResult}: ${env.BUILD_URL}"
+        }
+    }
+}

@@ -1,0 +1,25 @@
+{
+  "name": "prestashop-vv-tests",
+  "private": true,
+  "description": "V&V final project suites: Cypress (Gherkin es), Serenity/JS Screenplay, Stagehand",
+  "scripts": {
+    "test:cypress": "cypress run --spec \"cypress/e2e/**/*.feature\"",
+    "test:blackbox": "cypress run --spec \"cypress/blackbox/**/*.cy.js\"",
+    "test:security": "cypress run --spec \"cypress/security/**/*.cy.js\"",
+    "test:a11y": "cypress run --spec \"cypress/a11y/**/*.cy.js\"",
+    "test:regression": "cypress run --spec \"cypress/e2e/**/*.feature,cypress/security/**/*.cy.js\" --reporter junit --reporter-options \"mochaFile=reports/regression/run-[hash].xml\"",
+    "test:stagehand": "npm --prefix stagehand test"
+  },
+  "devDependencies": {
+    "@badeball/cypress-cucumber-preprocessor": "^28.0.1",
+    "@bahmutov/cypress-esbuild-preprocessor": "^2.2.8",
+    "axe-core": "^4.14.0",
+    "cypress": "^15.21.1",
+    "cypress-axe": "^1.7.0",
+    "esbuild": "^0.28.2"
+  },
+  "allowScripts": {
+    "cypress@15.21.1": true,
+    "esbuild@0.28.2": true
+  }
+}

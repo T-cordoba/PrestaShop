@@ -1,0 +1,21 @@
+{
+  "name": "prestashop-vv-stagehand",
+  "private": true,
+  "description": "Stagehand + Ollama E2E (AI) for RF-01..RF-10 of the PrestaShop V&V project",
+  "type": "module",
+  "scripts": {
+    "test": "node --import tsx --test --test-concurrency=1 --test-reporter=spec --test-reporter-destination=stdout --test-reporter=junit --test-reporter-destination=reports/junit-stagehand.xml *.e2e.mts"
+  },
+  "dependencies": {
+    "@browserbasehq/stagehand": "4.3.0",
+    "zod": "4.4.3"
+  },
+  "devDependencies": {
+    "@types/node": "24.9.1",
+    "tsx": "4.20.6",
+    "typescript": "5.9.3"
+  },
+  "allowScripts": {
+    "esbuild@0.25.12": true
+  }
+}
