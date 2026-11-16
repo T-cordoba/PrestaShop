@@ -119,7 +119,7 @@ final class ManufacturerQueryBuilder extends AbstractDoctrineQueryBuilder
 
             if ('name' === $filterName) {
                 $qb->andWhere('m.`name` LIKE :' . $filterName)
-                    ->setParameter($filterName, '%' . addcslashes($value, '%_\\') . '%');
+                    ->setParameter($filterName, self::containsPattern((string) $value));
                 continue;
             }
             $qb->andWhere('m.`' . $filterName . '` = :' . $filterName)
@@ -131,5 +131,13 @@ final class ManufacturerQueryBuilder extends AbstractDoctrineQueryBuilder
         $qb->setParameter('contextShopIds', $this->contextShopIds, Connection::PARAM_INT_ARRAY);
 
         return $qb;
+    }
+
+    /**
+     * LIKE pattern matching the typed text anywhere, with the text's own % and _ taken literally.
+     */
+    private static function containsPattern(string $text): string
+    {
+        return '%' . addcslashes($text, '%_\\') . '%';
     }
 }
