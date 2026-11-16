@@ -27,7 +27,6 @@ pipeline {
             steps {
                 sh '''
                     docker run --rm --volumes-from jenkins -w "$WORKSPACE" $PHP_IMAGE bash -c '
-                      git config --global --add safe.directory "*" &&
                       curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer &&
                       composer install --no-interaction --prefer-dist --no-progress --no-scripts'
                 '''
