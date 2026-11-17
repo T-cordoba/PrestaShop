@@ -67,8 +67,9 @@ describe('RF-10 Agregar valor a característica (Tomás)', () => {
     const cp = 'CP-10-05';
     cy.apiToken('TOMAS').should('be.a', 'string');
     api('TOMAS', 'POST', '/features/values', { featureId: 999999, values: { 'en-US': 'VV-10-CP05' } }).then((r) => {
-      cy.writeFile(`cypress/screenshots/api/${cp}.json`, { request: 'POST /admin-api/features/values {featureId: 999999}', status: r.status, body: r.body });
-      expect(r.status, 'código HTTP para característica inexistente').to.be.oneOf([404, 422]);
+      // The evidence is written before asserting: a failing expect would otherwise abort the queued writeFile.
+      cy.writeFile(`cypress/screenshots/api/${cp}.json`, { request: 'POST /admin-api/features/values {featureId: 999999}', status: r.status, body: r.body })
+        .then(() => expect(r.status, 'código HTTP para característica inexistente').to.be.oneOf([404, 422]));
     });
   });
 });
