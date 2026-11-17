@@ -1,0 +1,27 @@
+{
+  "name": "prestashop-vv-serenity",
+  "private": true,
+  "description": "Serenity/JS + Cucumber (Gherkin es) + Playwright Screenplay for RF-01..RF-10 of the PrestaShop V&V project",
+  "scripts": {
+    "test": "cucumber-js",
+    "test:juliana": "cucumber-js --tags @juliana",
+    "test:tomas": "cucumber-js --tags @tomas",
+    "test:report": "html-reporter serve --dir reports/serenity-js --port 8080 --open",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@cucumber/cucumber": "13.3.0",
+    "@serenity-js/assertions": "3.48.0",
+    "@serenity-js/console-reporter": "3.48.0",
+    "@serenity-js/core": "3.48.0",
+    "@serenity-js/cucumber": "3.48.0",
+    "@serenity-js/html-reporter": "3.48.0",
+    "@serenity-js/playwright": "3.48.0",
+    "@serenity-js/rest": "3.48.0",
+    "@serenity-js/web": "3.48.0",
+    "@types/node": "24.10.0",
+    "playwright": "1.63.0",
+    "ts-node": "10.9.2",
+    "typescript": "5.9.3"
+  }
+}
