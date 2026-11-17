@@ -1,14 +1,15 @@
 {
   "name": "prestashop-vv-tests",
   "private": true,
-  "description": "V&V final project suites: Cypress (Gherkin es), Serenity/JS Screenplay, Stagehand",
+  "description": "V&V final project suites: Cypress (Gherkin es), Serenity/JS Screenplay, Stagehand, Vitest (front white box)",
   "scripts": {
     "test:cypress": "cypress run --spec \"cypress/e2e/**/*.feature\"",
     "test:blackbox": "cypress run --spec \"cypress/blackbox/**/*.cy.js\"",
     "test:security": "cypress run --spec \"cypress/security/**/*.cy.js\"",
     "test:a11y": "cypress run --spec \"cypress/a11y/**/*.cy.js\"",
     "test:regression": "cypress run --spec \"cypress/e2e/**/*.feature,cypress/security/**/*.cy.js\" --reporter junit --reporter-options \"mochaFile=reports/regression/run-[hash].xml\"",
-    "test:stagehand": "npm --prefix stagehand test"
+    "test:stagehand": "npm --prefix stagehand test",
+    "test:front": "vitest run --config front/vitest.config.mjs --reporter=default --reporter=junit --outputFile.junit=reports/front/junit-front.xml"
   },
   "devDependencies": {
     "@badeball/cypress-cucumber-preprocessor": "^28.0.1",
@@ -16,7 +17,10 @@
     "axe-core": "^4.14.0",
     "cypress": "^15.21.1",
     "cypress-axe": "^1.7.0",
-    "esbuild": "^0.28.2"
+    "esbuild": "^0.28.2",
+    "jquery": "^3.7.1",
+    "jsdom": "^26.1.0",
+    "vitest": "^3.2.4"
   },
   "allowScripts": {
     "cypress@15.21.1": true,
